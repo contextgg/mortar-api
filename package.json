@@ -14,7 +14,8 @@
     "hono": "^4.6.20",
     "postgres": "^3.4.5",
     "arctic": "^3.5.0",
-    "nanoid": "^5.0.9"
+    "nanoid": "^5.0.9",
+    "jose": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.12",

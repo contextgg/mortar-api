@@ -82,3 +82,42 @@ CREATE TABLE IF NOT EXISTS matches (
 );
 
 CREATE INDEX IF NOT EXISTS idx_matches_tournament_id ON matches(tournament_id);
+
+-- Games (downloadable via desktop app)
+CREATE TABLE IF NOT EXISTS games (
+  slug TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  icon_url TEXT,
+  github_repo TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Game releases
+CREATE TABLE IF NOT EXISTS game_releases (
+  id TEXT PRIMARY KEY,
+  game_slug TEXT NOT NULL REFERENCES games(slug) ON DELETE CASCADE,
+  version TEXT NOT NULL,
+  changelog TEXT,
+  pub_date TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(game_slug, version)
+);
+
+CREATE INDEX IF NOT EXISTS idx_game_releases_game_slug ON game_releases(game_slug);
+
+-- Platform-specific download assets for a release
+CREATE TABLE IF NOT EXISTS game_release_assets (
+  id TEXT PRIMARY KEY,
+  release_id TEXT NOT NULL REFERENCES game_releases(id) ON DELETE CASCADE,
+  platform TEXT NOT NULL,
+  url TEXT NOT NULL,
+  storage_key TEXT,
+  size BIGINT,
+  UNIQUE(release_id, platform)
+);
+
+-- Seed mortar game
+INSERT INTO games (slug, name, description, github_repo)
+VALUES ('mortar', 'Mortar', 'The Mortar game engine', 'contextgg/mortar')
+ON CONFLICT (slug) DO NOTHING;
