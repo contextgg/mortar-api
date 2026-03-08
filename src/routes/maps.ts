@@ -126,6 +126,31 @@ mapRoutes.post('/:slug/fork', requireAuth, async (c) => {
   return c.json(map, 201);
 });
 
+// Get map rotation (maps available for matchmaking)
+mapRoutes.get('/rotation', async (c) => {
+  const maps = await sql`
+    SELECT m.id, m.slug, m.title, m.description,
+           length(m.data::text)::bigint as size,
+           m.updated_at
+    FROM map_rotation mr
+    JOIN maps m ON m.id = mr.map_id
+    WHERE m.published = true
+    ORDER BY mr.added_at
+  `;
+  return c.json(maps);
+});
+
+// Download a map's data by slug (for client and server sync)
+mapRoutes.get('/:slug/download', async (c) => {
+  const [map] = await sql`
+    SELECT m.data FROM maps m
+    WHERE m.slug = ${c.req.param('slug')} AND m.published = true
+  `;
+  if (!map) return c.json({ error: 'Map not found' }, 404);
+
+  return c.json(map.data);
+});
+
 // Like/unlike map
 mapRoutes.post('/:slug/like', requireAuth, async (c) => {
   const user = c.get('user');

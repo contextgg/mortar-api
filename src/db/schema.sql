@@ -117,6 +117,32 @@ CREATE TABLE IF NOT EXISTS game_release_assets (
   UNIQUE(release_id, platform)
 );
 
+-- Map rotation — which published maps are in the current matchmaking pool
+CREATE TABLE IF NOT EXISTS map_rotation (
+  map_id TEXT PRIMARY KEY REFERENCES maps(id) ON DELETE CASCADE,
+  added_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Game sessions — a match in progress on a game server
+CREATE TABLE IF NOT EXISTS game_sessions (
+  id TEXT PRIMARY KEY,
+  map_id TEXT NOT NULL REFERENCES maps(id),
+  status TEXT NOT NULL DEFAULT 'starting' CHECK (status IN ('starting', 'running', 'finished')),
+  server_addr TEXT,
+  server_port INTEGER NOT NULL DEFAULT 27015,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  finished_at TIMESTAMPTZ
+);
+
+-- Players assigned to a game session
+CREATE TABLE IF NOT EXISTS game_session_players (
+  session_id TEXT NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token TEXT NOT NULL,
+  team INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (session_id, user_id)
+);
+
 -- Seed mortar game
 INSERT INTO games (slug, name, description, github_repo)
 VALUES ('mortar', 'Mortar', 'The Mortar game engine', 'contextgg/mortar')

@@ -6,6 +6,7 @@ import { mapRoutes } from './routes/maps.js';
 import { userRoutes } from './routes/users.js';
 import { tournamentRoutes } from './routes/tournaments.js';
 import { gameRoutes } from './routes/games.js';
+import { matchmakingRoutes } from './routes/matchmaking.js';
 
 export const app = new Hono();
 
@@ -31,3 +32,4 @@ app.route('/api/maps', mapRoutes);
 app.route('/api/users', userRoutes);
 app.route('/api/tournaments', tournamentRoutes);
 app.route('/api/games', gameRoutes);
+app.route('/api/matchmaking', matchmakingRoutes);
